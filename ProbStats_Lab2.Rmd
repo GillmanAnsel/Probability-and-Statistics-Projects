@@ -1,0 +1,141 @@
+---
+title: "STA 3032 — Lab 2: Simulating Bayes' Rule"
+author: "Ansel Gillman"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  pdf_document:
+    latex_engine: xelatex
+    toc: false
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+set.seed(42)
+library(tidyverse)
+```
+
+
+
+---
+
+## Lab Question 1: Simulating a Medical Test with Prevalence = 1%
+
+**Part A: Simulation and confusion matrix**
+
+```{r sim-prevalence-1}
+# Parameters
+n <- 10000
+prev <- 0.01            # prevalence (1%)
+sensitivity <- 0.99     # P(+ | disease)
+specificity <- 0.95     # P(- | no disease)
+
+# Simulate who has the disease
+has_disease <- rbinom(n, 1, prev)
+
+# Simulate test results
+test_positive <- ifelse(
+  has_disease == 1,
+  rbinom(n, 1, sensitivity),
+  rbinom(n, 1, 1 - specificity)
+)
+
+# Confusion matrix
+conf_mat <- table(has_disease, test_positive)
+conf_mat
+
+# Posterior (empirical)
+posterior_empirical <- sum(has_disease == 1 & test_positive == 1) / sum(test_positive == 1)
+posterior_empirical
+```
+
+**Answer (Q1A):** The confusion matrix is printed above. From it, the probability that a person who tests positive actually has the disease (empirical posterior) is also calculated.
+
+---
+
+**Part B: Theoretical posterior using Bayes’ Rule**
+
+```{r bayes-theoretical-1}
+P_D <- prev
+P_pos_given_D <- sensitivity
+P_pos_given_notD <- 1 - specificity
+
+posterior_theoretical <- (P_pos_given_D * P_D) / (
+  P_pos_given_D * P_D + P_pos_given_notD * (1 - P_D)
+)
+posterior_theoretical
+```
+
+**Answer (Q1B):** The theoretical posterior probability is shown above. It closely matches the empirical simulation, with small differences due to randomness.
+
+---
+
+## Lab Question 2: Changing Prevalence to 10%
+
+**Part A: Simulation and confusion matrix**
+
+```{r sim-prevalence-10}
+prev2 <- 0.10
+has_disease2 <- rbinom(n, 1, prev2)
+
+test_positive2 <- ifelse(
+  has_disease2 == 1,
+  rbinom(n, 1, sensitivity),
+  rbinom(n, 1, 1 - specificity)
+)
+
+conf_mat2 <- table(has_disease2, test_positive2)
+conf_mat2
+
+posterior_empirical2 <- sum(has_disease2 == 1 & test_positive2 == 1) / sum(test_positive2 == 1)
+posterior_empirical2
+```
+
+**Answer (Q2A):** The confusion matrix and empirical posterior are displayed above for the 10% prevalence case.
+
+---
+
+**Part B: Theoretical posterior**
+
+```{r bayes-theoretical-10}
+P_D2 <- prev2
+posterior_theoretical2 <- (P_pos_given_D * P_D2) / (
+  P_pos_given_D * P_D2 + P_pos_given_notD * (1 - P_D2)
+)
+posterior_theoretical2
+```
+
+**Answer (Q2B):** The theoretical posterior is shown above. Again, it matches the simulation result closely.
+
+**Comment:** The posterior probability that a person actually has the disease given a positive test result is much higher when prevalence is 10% compared to 1%.
+
+---
+
+## Lab Question 3: Interpretation
+
+**Q3A: How does the posterior probability change when prevalence increases?**
+
+**Answer:** It increases. With higher prevalence, a positive test is more likely to be a true positive instead of a false alarm.
+
+**Q3B: What does this mean in real-world screening for rare diseases?**
+
+**Answer:** When a disease is very rare, even good tests can produce mostly false positives. This is why confirmatory testing is important — otherwise, screening could cause unnecessary stress and follow-up procedures.
+
+---
+
+## Summary Table Comparing Both Prevalences
+
+```{r summary-table}
+summary_df <- tibble(
+  prevalence = c(prev, prev2),
+  empirical_posterior = c(posterior_empirical, posterior_empirical2),
+  theoretical_posterior = c(posterior_theoretical, posterior_theoretical2)
+)
+summary_df %>% knitr::kable(digits = 4)
+```
+
+---
+
+```{r session-info, echo=FALSE}
+sessionInfo()
+```

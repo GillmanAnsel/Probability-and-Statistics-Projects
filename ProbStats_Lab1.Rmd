@@ -1,0 +1,82 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+### Exercise 2 ####
+
+# (a) Setup
+```{r}
+# install.packages("palmerpenguins")   
+library(palmerpenguins)
+penguins <- palmerpenguins::penguins
+```
+
+# (b) Structure and dimensions
+```{r}
+str(penguins)
+dim(penguins)
+names(penguins)
+sapply(penguins, class)
+```
+#344 Observations. 8 variables, (3 categorical variables, 5 numeric)
+
+# (c) Summary
+```{r}
+summary(penguins)
+```
+
+# (d) Missing values
+```{r}
+colSums(is.na(penguins))
+```
+#variables with missing data are bill_length_mm, bill_depth_mm, body_mass_g, sex
+#(e) Most variation
+```{r}
+sapply(penguins[, sapply(penguins, is.numeric)], var, na.rm = TRUE)
+```
+#body_mass_g has the most variation because its number is the highest
+
+# (F) Boxplot of body mass by species
+```{r fig.width=6, fig.height=4}
+boxplot(body_mass_g ~ species, data = penguins,
+        main = "Penguin Body Mass by Species",
+        ylab = "Body Mass(g)", xlab = "Species",
+        col = c("lightblue", "lightgreen", "lightpink"))
+```  
+## Choice ii -> "The species have different body mass."
+
+# (g) Scatterplot
+```{r fig.width=6, fig.height=4}
+plot(penguins$bill_length_mm, penguins$flipper_length_mm,
+     main = "Bill Length vs Flipper Length",
+     xlab = "Bill length (mm)", ylab = "Flipper Length (mm)",
+     pch = 19, col = "blue")
+```
+
+# Extra credit (ggplot2)
+```{r fig.width=6, fig.height=4}
+library(ggplot2)
+ggplot(penguins, aes(x = bill_length_mm, y = flipper_length_mm, color = species)) + 
+  geom_point(size = 2) +
+  labs(title = "Bill Length vs Flipper Length by Species")
+```
+#Choice i -> there is a positive relationship
+
+# (h) Which island has the largest number of penguins?
+```{r}
+table(penguins$island)
+table(penguins$island, penguins$species)
+```
+#Biscoe has the largest number of penguins
+#There Are Adelie and Gentoo penguins on Biscoe
+#There are Adelie and Chinstrap penguins on Dream
+#There are only Adelie penguins on Torgersen
+
+#(i) Penguins by island
+```{r fig.width=6, fig.height=4}
+ggplot(penguins, aes(x = island, fill = species)) +
+  geom_bar(position = 'dodge') +
+  labs(title = "Penguin Counts by Species and Island", y = "Number of Penguins")
+```
+
